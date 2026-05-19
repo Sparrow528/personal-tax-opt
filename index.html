@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>个人所得税（高管）优化测算 — 宇守信咨询</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#f0f2f5; color:#2d3436; padding-bottom:60px; }
+.header { background:linear-gradient(135deg,#1a0a2e,#3b1c6e); color:white; padding:32px 20px 24px; text-align:center; }
+.header h1 { font-size:22px; font-weight:700; margin-bottom:6px; }
+.header p { font-size:13px; opacity:0.85; }
+.header .badge { display:inline-block; background:rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:11px; margin-top:8px; }
+.tabs { display:flex; background:white; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:sticky; top:0; z-index:10; }
+.tab { flex:1; text-align:center; padding:14px 0; font-size:14px; font-weight:500; color:#888; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; }
+.tab.active { color:#3b1c6e; border-bottom-color:#3b1c6e; }
+.panel { display:none; padding:16px; }
+.panel.active { display:block; }
+.card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:12px; }
+.card-title { background:#f0f4ff; padding:10px 16px; font-size:13px; font-weight:600; color:#3b1c6e; border-bottom:1px solid #e0e7ff; }
+.form-row { padding:10px 16px; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.form-row label { font-size:13px; color:#444; min-width:150px; flex-shrink:0; }
+.form-row input,.form-row select { padding:8px 12px; border:1px solid #e0e0e0; border-radius:8px; font-size:13px; flex:1; min-width:80px; max-width:200px; background:#fff8e1; line-height:44px; height:44px; }
+.form-row input:focus,.form-row select:focus { outline:none; border-color:#3b82f6; }
+.form-row .unit { font-size:12px; color:#888; }
+.yesno { display:flex; gap:8px; }
+.yesno span { padding:4px 16px; border-radius:16px; font-size:13px; cursor:pointer; border:1px solid #ddd; color:#666; }
+.yesno span.sel-yes { background:linear-gradient(135deg,#1a0a2e,#3b1c6e); color:white; border-color:#3b82f6; }
+.yesno span.sel-no { background:#e8ecf1; color:#999; border-color:#ddd; }
+.fixed-bottom { position:sticky; bottom:0; background:white; padding:12px 16px; display:flex; gap:10px; box-shadow:0 -2px 8px rgba(0,0,0,0.06); z-index:10; }
+.fixed-bottom button { flex:1; padding:12px; border-radius:10px; font-size:14px; font-weight:600; border:none; cursor:pointer; }
+.btn-primary { background:linear-gradient(135deg,#1a0a2e,#3b1c6e); color:white; }
+.btn-primary:hover { opacity:0.9; }
+.btn-secondary { background:#e8ecf1; color:#555; }
+
+.score-card { background:linear-gradient(135deg,#1a0a2e,#3b1c6e); color:white; border-radius:16px; padding:28px 20px; text-align:center; margin-bottom:16px; }
+.score-card .label { font-size:13px; opacity:0.85; }
+.score-card .score { font-size:40px; font-weight:800; margin:6px 0; }
+.score-card .grade { font-size:16px; font-weight:600; margin-bottom:4px; }
+.score-card .suggestion { font-size:13px; opacity:0.9; line-height:1.6; }
+.result-summary { background:linear-gradient(135deg,#1a0a2e,#3b1c6e); color:white; border-radius:16px; padding:28px 20px; text-align:center; margin-bottom:16px; }
+.result-summary .row { display:flex; justify-content:space-around; margin-top:12px; flex-wrap:wrap; gap:8px; }
+.result-summary .item { flex:1; min-width:100px; }
+.result-summary .item .label { font-size:11px; opacity:0.85; }
+.result-summary .item .val { font-size:22px; font-weight:800; margin:4px 0; }
+.result-summary .item .sub { font-size:12px; opacity:0.85; }
+
+.dim-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+.dim-card { background:white; border-radius:12px; padding:16px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.dim-card .name { font-size:12px; color:#888; margin-bottom:4px; }
+.dim-card .dscore { font-size:20px; font-weight:700; }
+.dim-card .dstatus { font-size:11px; margin-top:4px; padding:2px 10px; border-radius:10px; display:inline-block; }
+.low { background:#e6f7e6; color:#16a34a; }
+.mid { background:#fef9e7; color:#d97706; }
+.high { background:#feeaea; color:#dc2626; }
+.pass { background:#e6f7e6; color:#16a34a; }
+.warn { background:#fef9e7; color:#d97706; }
+.danger { background:#feeaea; color:#dc2626; }
+.fail { background:#feeaea; color:#dc2626; }
+.caution { background:#fef9e7; color:#d97706; }
+.rate-green { background:#e6f7e6; color:#16a34a; }
+.rate-yellow { background:#fef9e7; color:#d97706; }
+.rate-red { background:#feeaea; color:#dc2626; }
+
+.help-card { background:white; border-radius:12px; padding:20px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.help-card h3 { font-size:15px; margin-bottom:8px; color:#3b1c6e; }
+.help-card p,.help-card li { font-size:13px; color:#555; line-height:1.8; }
+.check-list { list-style:none; padding:0; }
+.check-list li { padding:6px 0; font-size:13px; color:#444; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:8px; }
+.check-list li:last-child { border-bottom:none; }
+.detail-item { padding:12px 16px; border-bottom:1px solid #f5f5f5; display:flex; justify-content:space-between; align-items:center; }
+.detail-item:last-child { border-bottom:none; }
+.detail-item .dlabel { font-size:13px; color:#555; }
+.detail-item .dval { font-size:14px; font-weight:600; }
+.detail-item .dval.pass { color:#16a34a; }
+.detail-item .dval.warn { color:#d97706; }
+.detail-item .dval.danger { color:#dc2626; }
+.result-card { background:white; border-radius:12px; padding:16px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.result-card h3 { font-size:14px; color:#3b1c6e; margin-bottom:8px; }
+.result-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #f5f5f5; font-size:13px; }
+.result-row:last-child { border-bottom:none; }
+.result-row .label { color:#555; }
+.result-row .val { font-weight:600; }
+.result-row.total { border-top:2px solid #3b1c6e; padding-top:8px; margin-top:4px; font-weight:700; }
+.result-row.total .val { color:#3b1c6e; font-size:16px; }
+.result-green { color:#16a34a; }
+.result-red { color:#dc2626; }
+.result-orange { color:#d97706; }
+
+.member-banner { background:linear-gradient(135deg,#0f0c29,#302b63,#24243e); border-radius:12px; padding:20px; text-align:center; margin-top:16px; }
+.member-banner h3 { font-size:15px; color:white; margin-bottom:6px; }
+.member-banner p { font-size:12px; color:rgba(255,255,255,0.85); line-height:1.6; }
+.member-banner .btn { display:inline-block; background:white; color:#3b1c6e; padding:8px 24px; border-radius:20px; text-decoration:none; font-size:13px; font-weight:600; margin-top:8px; }
+
+.contact { background:#eef2ff; border-radius:8px; padding:12px; }
+.contact strong { font-size:14px; color:#3b1c6e; }
+.scenario-grid { display:flex; gap:8px; }
+.scenario-btn { flex:1; padding:10px; border-radius:8px; font-size:13px; font-weight:600; border:2px solid #ddd; background:white; color:#888; cursor:pointer; text-align:center; transition:all .2s; }
+.scenario-btn.active { border-color:#3b82f6; color:#3b1c6e; background:#eef2ff; }
+.chart-area { background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06); margin-bottom:16px; text-align:center; }
+.chart-area canvas { max-width:100%; height:auto; }
+.form-row input[type=range] { flex:1; min-width:120px; max-width:250px; accent-color:#3b82f6; }
+.form-row .val { font-size:14px; font-weight:700; color:#3b1c6e; min-width:30px; text-align:right; }
+.form-row .hint { font-size:11px; color:#999; }
+.dim-card .bar-bg { position:absolute; bottom:0; left:0; height:4px; background:#e8ecf1; width:100%; }
+.dim-card .bar-fill { position:absolute; bottom:0; left:0; height:4px; transition:width .5s; }
+
+@media (max-width:480px){.dim-grid{grid-template-columns:1fr 1fr}.result-summary .row{flex-direction:column;gap:4px}}
+
+
+/* ===== 打印/PDF样式 ===== */
+@media print {
+  body { background:white !important; padding:0 !important; margin:0 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .fixed-bottom, .no-print, .marketing, [class*="返回"], footer, .footer, #返回, .return-bar, .bottom-bar { display:none !important; }
+  .header { background:linear-gradient(135deg,#0c1445,#1a3a6b) !important; color:white !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; padding:20px 16px !important; }
+  .card, .dim-card, .check-item, .result-card { break-inside:avoid; page-break-inside:avoid; border:1px solid #ddd !important; box-shadow:none !important; }
+  .score-card, .result-summary { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .tabs { display:none !important; }
+  .panel { display:block !important; padding:10px !important; }
+  .dim-grid { display:grid !important; grid-template-columns:1fr 1fr !important; gap:8px !important; }
+  .form-row { padding:6px 10px !important; }
+  a[href]:after { content:none !important; }
+}
+
+.pdf-btn { background:linear-gradient(135deg,#b8860b,#d4a843) !important; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>👤 个人所得税（高管）优化测算</h1>
+  <p>工资vs分红vs期权 · 税负对比 · 最优薪酬结构</p>
+  <div class="badge">您身边的财税专家 · 洪淳宇</div>
+</div>
+<div class="tabs">
+  <div class="tab active" data-tab="input" onclick="st('input')">📝 填数据</div>
+  <div class="tab" data-tab="report" onclick="st('report')">📊 优化方案</div>
+  <div class="tab" data-tab="help" onclick="st('help')">💡 说明</div>
+</div>
+
+<div class="panel active" id="panel-input">
+  <div class="card">
+    <div class="card-title">📋 高管基本信息</div>
+    <div class="form-row"><label>企业名称</label><input id="compName" value="示例企业"></div>
+    <div class="form-row"><label>姓名</label><input id="empName" value="张三"></div>
+    <div class="form-row"><label>年薪总额预算（万元）</label><input id="totalBudget" type="number" value="120"></div>
+    <div class="form-row"><label>身份</label>
+      <select id="identity">
+        <option value="employee">员工（劳动合同）</option>
+        <option value="owner">股东/创始人</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🧾 当前方案（基准）</div>
+    <div class="form-row"><label>月工资（万元）</label><input id="monthlySalary" type="number" value="5"></div>
+    <div class="form-row"><label>年终奖（万元）</label><input id="bonus" type="number" value="20"></div>
+    <div class="form-row"><label>年度分红（万元）</label><input id="dividend" type="number" value="40"></div>
+    <div class="form-row"><label>股权激励价值（万元）</label><input id="equity" type="number" value="0"></div>
+  </div>
+
+  <div class="fixed-bottom">
+    <button class="btn-primary" onclick="calc()">🧮 开始测算</button>
+    <button class="btn-secondary" onclick="resetAll()">🔄 重置</button>
+  </div>
+</div>
+
+<div class="panel" id="panel-report"><div id="reportContent"></div>
+  <div class="fixed-bottom"><button class="btn-secondary" onclick="st('input')">📝 返回修改</button></div>
+</div>
+
+<div class="panel" id="panel-help">
+  <div class="help-card"><h3>📖 使用说明</h3><p>输入高管的年薪预算和当前分配方案，系统自动对比工资、年终奖、分红、股权激励四种方式的税负，给出最优薪酬结构建议。</p></div>
+  <div class="help-card"><h3>📊 计算逻辑</h3><p>• 工资：综合所得税率3%-45%，减除费用6万/年<br>• 年终奖：可选择单独计税（除以12找税率）或并入综合所得<br>• 分红：20%固定税率<br>• 股权激励：综合所得税率+递延纳税优惠</p></div>
+  <div class="help-card"><h3>⚠️ 免责声明</h3><p>测算结果仅供参考，实际税负受各地税收优惠、个税专项附加扣除等因素影响。</p></div>
+  <div class="member-banner"><h3>🥇 金级会员专属服务</h3><p>金级会员享薪酬架构优化、股权激励税务方案定制<br>电话：186-0129-4989</p><a class="btn" href="https://sparrow528.github.io/tax-membership/" target="_blank">了解会员方案 →</a></div>
+</div>
+
+<script>
+function st(tab){
+  var ts=document.querySelectorAll('.tab');var ps=document.querySelectorAll('.panel');
+  for(var i=0;i<ts.length;i++){ts[i].className='tab'+(ts[i].dataset.tab===tab?' active':'');ps[i].className='panel'+(ps[i].id==='panel-'+tab?' active':'');}
+}
+
+// 个税速算
+function calcIncomeTax(annual){
+  if(annual<=0) return 0;
+  var taxable=Math.max(0,annual-6); // 减6万免征额
+  var tax=0;
+  if(taxable<=36000) tax=taxable*0.03;
+  else if(taxable<=144000) tax=taxable*0.1-2520;
+  else if(taxable<=300000) tax=taxable*0.2-16920;
+  else if(taxable<=420000) tax=taxable*0.25-31920;
+  else if(taxable<=660000) tax=taxable*0.3-52920;
+  else if(taxable<=960000) tax=taxable*0.35-85920;
+  else tax=taxable*0.45-181920;
+  return Math.max(0,tax);
+}
+
+function calc(){
+  var name=document.getElementById('empName').value||'未知';
+  var budget=parseFloat(document.getElementById('totalBudget').value)||0;
+  var isOwner=document.getElementById('identity').value==='owner';
+
+  var ms=parseFloat(document.getElementById('monthlySalary').value)||0;
+  var bonus=parseFloat(document.getElementById('bonus').value)||0;
+  var dividend=parseFloat(document.getElementById('dividend').value)||0;
+  var equity=parseFloat(document.getElementById('equity').value)||0;
+
+  // 当前方案
+  var salaryAnnual=ms*12;
+  var salaryTax=calcIncomeTax(salaryAnnual+bonus);
+  var bonusTax=0;
+  // 年终奖单独计税
+  var bm=bonus/12;
+  if(bm<=3000) bonusTax=bonus*0.03;
+  else if(bm<=12000) bonusTax=bonus*0.1-210;
+  else if(bm<=25000) bonusTax=bonus*0.2-1410;
+  else if(bm<=35000) bonusTax=bonus*0.25-2660;
+  else if(bm<=55000) bonusTax=bonus*0.3-4410;
+  else if(bm<=80000) bonusTax=bonus*0.35-7160;
+  else bonusTax=bonus*0.45-15160;
+  bonusTax=Math.max(0,bonusTax);
+
+  var totalSalaryTax=Math.min(salaryTax+bonusTax, calcIncomeTax(salaryAnnual+bonus));
+  var dividendTax=dividend*0.2;
+  var equityTax=equity*0.2; // 简化
+  var totalTax=totalSalaryTax+dividendTax+equityTax;
+  var takeHome=budget-totalTax;
+
+  // 优化方案：工资60% + 年终奖15% + 分红25%
+  var optSalary=budget*0.6;
+  var optBonus=budget*0.15;
+  var optDividend=budget*0.25;
+  var optEquity=0;
+  if(isOwner) {optDividend=budget*0.35;optSalary=budget*0.5;optBonus=budget*0.15;}
+
+  var optSalaryTax=calcIncomeTax(optSalary+optBonus);
+  var optBm=optBonus/12;
+  var optBonusTax=0;
+  if(optBm<=3000) optBonusTax=optBonus*0.03;
+  else if(optBm<=12000) optBonusTax=optBonus*0.1-210;
+  else if(optBm<=25000) optBonusTax=optBonus*0.2-1410;
+  else if(optBm<=35000) optBonusTax=optBonus*0.25-2660;
+  else if(optBm<=55000) optBonusTax=optBonus*0.3-4410;
+  else if(optBm<=80000) optBonusTax=optBonus*0.35-7160;
+  else optBonusTax=optBonus*0.45-15160;
+  optBonusTax=Math.max(0,optBonusTax);
+
+  var optTotalSalaryTax=Math.min(optSalaryTax+optBonusTax, calcIncomeTax(optSalary+optBonus));
+  var optDividendTax=optDividend*0.2;
+  var optTotalTax=optTotalSalaryTax+optDividendTax;
+  var optTakeHome=budget-optTotalTax;
+  var savings=totalTax-optTotalTax;
+
+  var html='<div class="result-card"><h3>👤 '+name+' — 薪酬税务优化方案</h3><p style="font-size:13px;color:#555">年薪总预算：'+budget+'万元</p></div>';
+
+  html+='<div class="compare-box">';
+  html+='<div class="cbox"><div class="title">📋 当前方案税负</div><div class="num warn">'+totalTax.toFixed(1)+'</div><div style="font-size:11px;color:#888">万元</div><div style="font-size:11px;color:#999;margin-top:4px">实得：'+(budget-totalTax).toFixed(1)+'万</div></div>';
+  html+='<div class="cbox recommend"><div class="title">✅ 优化方案税负</div><div class="num good">'+optTotalTax.toFixed(1)+'</div><div style="font-size:11px;color:#888">万元</div><div style="font-size:11px;color:#999;margin-top:4px">实得：'+(budget-optTotalTax).toFixed(1)+'万</div></div>';
+  html+='</div>';
+
+  if(savings>0){
+    html+='<div class="result-card"><h3>💡 节税方案</h3>';
+    html+='<p style="font-size:13px;color:#555;line-height:1.8">优化后可节税约 <strong style="color:#16a34a;font-size:18px">'+savings.toFixed(1)+'万元</strong>！</p>';
+    html+='<p style="font-size:12px;color:#888;margin-top:6px">建议方案：年薪结构调整为工资'+optSalary.toFixed(0)+'万 + 年终奖'+optBonus.toFixed(0)+'万 + 分红'+optDividend.toFixed(0)+'万</p>';
+    html+='</div>';
+  }
+
+  html+='<div class="result-card"><h3>📊 方案对比明细</h3>';
+  html+='<div class="result-row"><span class="label">工资+年终奖个税（当前）</span><span class="val warn">'+totalSalaryTax.toFixed(1)+'万</span></div>';
+  html+='<div class="result-row"><span class="label">工资+年终奖个税（优化）</span><span class="val good">'+optTotalSalaryTax.toFixed(1)+'万</span></div>';
+  html+='<div class="result-row"><span class="label">分红个税（当前）</span><span class="val warn">'+dividendTax.toFixed(1)+'万</span></div>';
+  html+='<div class="result-row"><span class="label">分红个税（优化）</span><span class="val good">'+optDividendTax.toFixed(1)+'万</span></div>';
+  if(equity>0) html+='<div class="result-row"><span class="label">股权激励个税</span><span class="val warn">'+equityTax.toFixed(1)+'万</span></div>';
+  html+='<div class="result-row total"><span class="label">税负合计（当前）</span><span class="val warn">'+totalTax.toFixed(1)+'万</span></div>';
+  html+='<div class="result-row total"><span class="label">税负合计（优化）</span><span class="val good">'+optTotalTax.toFixed(1)+'万</span></div>';
+  html+='</div>';
+
+  html+='<div class="member-banner"><h3>🥇 金级会员专属服务</h3><p>金级会员享薪酬架构优化、股权激励方案定制<br>电话：186-0129-4989</p><a class="btn" href="https://sparrow528.github.io/tax-membership/" target="_blank">了解会员方案 →</a></div>';
+  document.getElementById('reportContent').innerHTML=html;st('report');
+}
+function resetAll(){
+  document.getElementById('compName').value='';document.getElementById('empName').value='';
+  document.getElementById('totalBudget').value='';document.getElementById('monthlySalary').value='';
+  document.getElementById('bonus').value='';document.getElementById('dividend').value='';document.getElementById('equity').value='';
+  document.getElementById('identity').selectedIndex=0;
+}
+
+function downloadPDF(){
+  window.print();
+}
+</script>
+</body>
+</html>
